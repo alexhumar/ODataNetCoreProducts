@@ -1,0 +1,10 @@
+/home/alex-mint/Microsoft/WebApiNetCore/bin/Debug/netcoreapp2.0/WebApiNetCore.deps.json
+/home/alex-mint/Microsoft/WebApiNetCore/bin/Debug/netcoreapp2.0/WebApiNetCore.runtimeconfig.json
+/home/alex-mint/Microsoft/WebApiNetCore/bin/Debug/netcoreapp2.0/WebApiNetCore.runtimeconfig.dev.json
+/home/alex-mint/Microsoft/WebApiNetCore/bin/Debug/netcoreapp2.0/WebApiNetCore.dll
+/home/alex-mint/Microsoft/WebApiNetCore/bin/Debug/netcoreapp2.0/WebApiNetCore.pdb
+/home/alex-mint/Microsoft/WebApiNetCore/obj/Debug/netcoreapp2.0/WebApiNetCore.csproj.CoreCompileInputs.cache
+/home/alex-mint/Microsoft/WebApiNetCore/obj/Debug/netcoreapp2.0/WebApiNetCore.AssemblyInfoInputs.cache
+/home/alex-mint/Microsoft/WebApiNetCore/obj/Debug/netcoreapp2.0/WebApiNetCore.AssemblyInfo.cs
+/home/alex-mint/Microsoft/WebApiNetCore/obj/Debug/netcoreapp2.0/WebApiNetCore.dll
+/home/alex-mint/Microsoft/WebApiNetCore/obj/Debug/netcoreapp2.0/WebApiNetCore.pdb
