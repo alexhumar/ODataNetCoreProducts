@@ -19,6 +19,13 @@ namespace WebApiNetCore
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                /*.ConfigureAppConfiguration((builderContext, config) =>
+                {
+                    IHostingEnvironment env = builderContext.HostingEnvironment;
+
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                          .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                }) -> AL FINAL NO HACE FALTA, YA QUE ESTO LO HACE POR DEFECTO...*/
                 .UseStartup<Startup>()
                 .Build();
     }

@@ -3,30 +3,58 @@ using Microsoft.AspNet.OData;
 using Models;
 using System.Collections.Generic;
 using System.Linq;
-using ODataService.Helpers;
 using System.Net.Http;
 using Microsoft.AspNetCore.Mvc;
+using DataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace ODataService.Controllers
 {
     public class CategoriesController : ODataController
     {
-        [EnableQuery]
-        public SingleResult<Category> GetCategory(int key)
+        DomainContext _dbcontext;
+
+        public DomainContext DBContext { get => _dbcontext; set => _dbcontext = value; }
+
+        public CategoriesController(DomainContext context)
         {
-            return SingleResult.Create(ObjectsBuilder.BuildCategories().Where(c => c.ID == key).AsQueryable());
+            this.DBContext = context;
+        }
+
+        public IActionResult GetNameFromCategory(long key)
+        {
+            //return Ok(ObjectsBuilder.BuildCategories().FirstOrDefault(c => c.ID == key).Name);
+            var category = this.DBContext.Categories.FirstOrDefault(c => c.ID == key);
+
+            if (category == null) return NotFound();
+
+            return Ok(category.Name);
+        }
+
+        [EnableQuery]
+        public SingleResult<Category> GetCategory(long key)
+        {
+            //return SingleResult.Create(ObjectsBuilder.BuildCategories().Where(c => c.ID == key).AsQueryable());
+            return SingleResult.Create(this.DBContext.Categories.Where(c => c.ID == key).AsQueryable());
         }
 
         [EnableQuery]
         public IQueryable<Category> GetCategories()
         {
-            return ObjectsBuilder.BuildCategories().AsQueryable();
+            //return ObjectsBuilder.BuildCategories().AsQueryable();
+            return this.DBContext.Categories.AsQueryable();
         }
 
         [EnableQuery]
-        public IQueryable<Product> GetProductsFromCategory(int key)
+        public IQueryable<Product> GetProductsFromCategory(long key)
         {
-            return ObjectsBuilder.BuildCategories().FirstOrDefault(c => c.ID == key).Products.AsQueryable();
+            //return ObjectsBuilder.BuildCategories().FirstOrDefault(c => c.ID == key).Products.AsQueryable();
+            var category = this.DBContext.Categories
+                                         .Include(c => c.Products) //LAZY LOADING TODAVIA NO ESTA DISPONIBLE EN EF CORE
+                                         .FirstOrDefault(c => c.ID == key);
+            var products = (category != null) ? category.Products : new List<Product>();
+
+            return products.AsQueryable();
         }
     }
 }

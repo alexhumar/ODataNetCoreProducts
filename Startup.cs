@@ -10,7 +10,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.EntityFrameworkCore;
 using Models;
+using DataAccess;
 
 namespace WebApiNetCore
 {
@@ -26,6 +28,8 @@ namespace WebApiNetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var config = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<DomainContext>(opt => opt.UseMySql(config));
             services.AddMvc();
             services.AddOData();
         }
