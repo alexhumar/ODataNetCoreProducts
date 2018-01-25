@@ -1,14 +1,11 @@
-using System;
-using System.Linq;
-using Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using Models;
 
 namespace DataAccess
 {
     public class DomainContext : DbContext
     {
-        public DomainContext(DbContextOptions<DomainContext> options) :base(options)
+        public DomainContext(DbContextOptions<DomainContext> options) : base(options)
         {
             Database.EnsureCreated();
         }

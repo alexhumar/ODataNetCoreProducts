@@ -1,12 +1,12 @@
 
+using DataAccess;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using Microsoft.AspNetCore.Mvc;
-using DataAccess;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ODataService.Controllers
 {
@@ -55,6 +55,17 @@ namespace ODataService.Controllers
             var products = (category != null) ? category.Products : new List<Product>();
 
             return products.AsQueryable();
+        }
+
+        public async Task<IActionResult> Post([FromBody] Category category)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            this.DBContext.Add(category);
+            await this.DBContext.SaveChangesAsync();
+
+            return Created(category);
         }
     }
 }

@@ -1,12 +1,12 @@
 
+using DataAccess;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using Microsoft.AspNetCore.Mvc;
-using DataAccess;
-using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace ODataService.Controllers
 {
@@ -21,14 +21,14 @@ namespace ODataService.Controllers
             this.DBContext = context;
         }
 
-        public IActionResult GetNameFromProduct(long key)            
+        public IActionResult GetNameFromProduct(long key)
         {
             //return Ok(ObjectsBuilder.BuildProducts().FirstOrDefault(p => p.ID == key).Name);
-            
-            var product = this.DBContext.Products.FirstOrDefault(p=> p.ID == key);
+
+            var product = this.DBContext.Products.FirstOrDefault(p => p.ID == key);
 
             if (product == null) return NotFound();
-            
+
             return Ok(product.Name);
         }
 
@@ -57,16 +57,16 @@ namespace ODataService.Controllers
 
             return SingleResult.Create(new List<Category> { category }.AsQueryable());
         }
+        
+        public async Task<IActionResult> Post([FromBody] Product product)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        //ESTO ME PARECE QUE NO SIRVE, QUE EL QUE CUENTA ES EL DE CategoriesController...
-        // [EnableQuery]
-        // public IQueryable<Product> GetProductsFromCategory(long key)
-        // {
-        //     //return ObjectsBuilder.BuildCategories().FirstOrDefault(c => c.ID == key).Products.AsQueryable();
-        //     var category = this.DBContext.Categories.FirstOrDefault(c => c.ID == key);
-        //     var products = (category != null) ? category.Products : new List<Product>();
+            this.DBContext.Add(product);
+            await this.DBContext.SaveChangesAsync();
 
-        //     return products.AsQueryable();
-        // }
+            return Created(product);
+        }
     }
 }
