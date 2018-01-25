@@ -7,6 +7,7 @@ using Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace ODataService.Controllers
 {
@@ -19,6 +20,11 @@ namespace ODataService.Controllers
         public ProductsController(DomainContext context)
         {
             this.DBContext = context;
+        }
+
+        private bool ExisteEntidad(long key)
+        {
+            return this.DBContext.Products.Any(p => p.ID == key);
         }
 
         public IActionResult GetNameFromProduct(long key)
@@ -67,6 +73,72 @@ namespace ODataService.Controllers
             await this.DBContext.SaveChangesAsync();
 
             return Created(product);
+        }
+
+        public async Task<IActionResult> Put([FromODataUri] long key, [FromBody] Product product)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (key != product.ID)
+                return BadRequest();
+
+            this.DBContext.Entry(product).State = EntityState.Modified;
+
+            try
+            {
+                await this.DBContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ExisteEntidad(key))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return Updated(product);
+        }
+
+        public async Task<IActionResult> Patch([FromODataUri] long key, [FromBody] Delta<Product> product)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            //HAY QUE TENER CUIDADO CON ESTOS INCLUDES Y EL NIVEL DE PROFUNDIDAD...
+            //PROBAR - TRATAR DE CAMBIAR LA CATEGORIA
+            var entity = await this.DBContext.Products.Include(p => p.Category)
+                                                      .FirstOrDefaultAsync(p => p.ID == key);
+            if (entity == null)
+                return NotFound();
+
+            product.Patch(entity);
+
+            try
+            {
+                await this.DBContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ExisteEntidad(key))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return Updated(entity);
+        }
+
+        public async Task<IActionResult> Delete(long key)
+        {
+            var product = await this.DBContext.Products.FindAsync(key);
+            if (product == null)
+                return NotFound();
+
+            this.DBContext.Products.Remove(product);
+            await this.DBContext.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

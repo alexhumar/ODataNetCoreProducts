@@ -21,6 +21,11 @@ namespace ODataService.Controllers
             this.DBContext = context;
         }
 
+        private bool ExisteEntidad(long key)
+        {
+            return this.DBContext.Products.Any(p => p.ID == key);
+        }
+
         public IActionResult GetNameFromCategory(long key)
         {
             //return Ok(ObjectsBuilder.BuildCategories().FirstOrDefault(c => c.ID == key).Name);
@@ -66,6 +71,70 @@ namespace ODataService.Controllers
             await this.DBContext.SaveChangesAsync();
 
             return Created(category);
+        }
+
+        public async Task<IActionResult> Put([FromODataUri] long key, [FromBody] Category category)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (key != category.ID)
+                return BadRequest();
+
+            this.DBContext.Entry(category).State = EntityState.Modified;
+
+            try
+            {
+                await this.DBContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ExisteEntidad(key))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return Updated(category);
+        }
+
+        public async Task<IActionResult> Patch([FromODataUri] long key, [FromBody] Delta<Category> category)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            
+            var entity = await this.DBContext.Categories.Include(c => c.Products)
+                                                        .FirstOrDefaultAsync(c => c.ID == key);
+            if (entity == null)
+                return NotFound();
+
+            category.Patch(entity);
+
+            try
+            {
+                await this.DBContext.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ExisteEntidad(key))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return Updated(entity);
+        }
+
+        public async Task<IActionResult> Delete(long key)
+        {
+            var category = await this.DBContext.Categories.FindAsync(key);
+            if (category == null)
+                return NotFound();
+
+            this.DBContext.Categories.Remove(category);
+            await this.DBContext.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
